@@ -34,20 +34,21 @@ def sanitizeString(input):
 	input += [" "]
 	return ''.join(input)
 
-D = root.findall(".//div[@class='thread']/div[@class='message']")
-P = root.findall(".//div[@class='thread']/p")
+def main(_):
+  D = root.findall(".//div[@class='thread']/div[@class='message']")
+  P = root.findall(".//div[@class='thread']/p")
 
-fileHandle = open("output.txt", "w")
+  fileHandle = open("output.txt", "w")
 
-for i in range(0,len(D)):
+  for i in range(0,len(D)):
 
-	text = P[i].text
-	for item in D[i].findall(".//div[@class='message_header']/span[@class='user']"):
-		user = item.text
-	if user != None and user == myName and text != None:
-		fileHandle.write(str(sanitizeString(str(text.encode("utf-8"))[2:-1]) + "\n"))
+    text = P[i].text
+    for item in D[i].findall(".//div[@class='message_header']/span[@class='user']"):
+      user = item.text
+    if user != None and user == myName and text != None:
+      fileHandle.write(str(sanitizeString(str(text.encode("utf-8"))[2:-1]) + "\n"))
 
-fileHandle.close()
+  fileHandle.close()
 '''
 for thread in :
 	print(thread.text)
