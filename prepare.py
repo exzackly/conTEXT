@@ -4,6 +4,8 @@ import collections
 import tensorflow as tf
 import numpy as np
 
+from random import shuffle
+
 import reader
 
 args = None
@@ -49,6 +51,17 @@ def _divide_data(train_prop = 0.8):
     #raw_data = f.read().replace("\n", "<eos>").split(" ")
     raw_data = f.read().decode('utf-8').split(" ")
   size = len(raw_data)
+
+  sentences = [[]]
+  for token in raw_data:
+    sentences[-1].append(token)
+    if token == '\n':
+      sentences.append([])
+  shuffle(sentences)
+  raw_data = []
+  for s in sentences:
+    raw_data += [x for x in s]
+
 
   # We want to take the test and validation data from the middle of
   # the dataset just in case the beginning or end has anomolies

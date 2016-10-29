@@ -32,8 +32,10 @@ class Args:
   pass
 
 if FLAGS.test:
-  print(rnn.test_words(" Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks"))
-  print(rnn.test_words(" hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u??"))
+  #rnn.get_test_session()
+  print(rnn.test_words(" 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 "))
+  #print(rnn.test_words(" Hello; my name is Brendon. If you do not believe this is me -- well there is nothing I can do. Cheers."))
+  #print(rnn.test_words("hiya why would u think it's me?? do i really type like this at all; i dont know why this isn't working at all. it makes me sad "))
 else:
   xp.extract_messages('messages.htm', 'messages.txt', 'Brendon Boldt')
   args = Args()

@@ -203,7 +203,7 @@ class SmallConfig(object):
   max_max_epoch = 13
   keep_prob = 1.0
   lr_decay = 0.5
-  batch_size = 20
+  batch_size = 1#20
   vocab_size = 10000
 
 
@@ -251,7 +251,7 @@ class TestConfig(object):
   max_max_epoch = 1
   keep_prob = 1.0
   lr_decay = 0.5
-  batch_size = 20
+  batch_size = 1
   vocab_size = 10000
 
 class CustomConfig(object):
@@ -417,9 +417,10 @@ if __name__ == "__main__":
   tf.app.run()
 
 def get_test_session():
+  sv = tf.train.Supervisor(logdir=FLAGS.save_path)
   with sv.managed_session() as session:
     print("Restoring model from " + FLAGS.save_path)
-    m.saver.restore(session, FLAGS.save_path + '-0')
+    sv.saver.restore(session, FLAGS.save_path + '-0')
   
     return session 
 
@@ -438,6 +439,8 @@ def test_words(words):
     sv = tf.train.Supervisor(logdir=FLAGS.save_path)
 
     with sv.managed_session() as session:
+      print("Restoring model from " + FLAGS.save_path)
+      mtest.saver.restore(session, FLAGS.save_path + '-0')
       test_perplexity = run_epoch(session, mtest)
       #print("Test Perplexity: %.3f" % test_perplexity)
       return test_perplexity 
