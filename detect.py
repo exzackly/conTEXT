@@ -8,6 +8,8 @@ import numpy as np
 import tensorflow as tf
 
 import rnn
+import prepare
+import xml_parser as xp
 
 flags = tf.flags
 
@@ -26,8 +28,19 @@ FLAGS = flags.FLAGS
 
 rnn.init(flags.FLAGS)
 
+class Args:
+  pass
+
 if FLAGS.test:
   print(rnn.test_words(" Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks Oh right; thanks"))
   print(rnn.test_words(" hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u?? hi! how are u??"))
 else:
+  xp.extract_messages('messages.htm', 'messages.txt', 'Brendon Boldt')
+  args = Args()
+  args.infile = 'messages.txt'
+  #args.outfile = FLAGS.data_path + 'tokens.txt'
+  args.out_dir = FLAGS.data_path
+  args.vocab_size = 10000
+  args.frequency = False
+  prepare.process_file(args)
   rnn.main()

@@ -320,7 +320,10 @@ def run_epoch(session, model, eval_op=None, verbose=False):
       '''
       top1, top5, top10, num_predictions = 0, 0, 0, 0
 
-  return np.exp(costs / iters)
+  if FLAGS.test:
+    return costs / iters
+  else:
+    return np.exp(costs / iters)
 
 
 def get_config():

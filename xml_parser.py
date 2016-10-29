@@ -4,10 +4,6 @@ import xml.etree.ElementTree as ET
 import string
 import re
 
-tree = ET.parse('messages.htm')
-root = tree.getroot()
-
-myName = "Brendon Boldt"
 
 '''
 myMessages = []
@@ -34,11 +30,14 @@ def sanitizeString(input):
 	input += [" "]
 	return ''.join(input)
 
-def main(_):
+def extract_messages(infile, outfile, myName):
+  tree = ET.parse(infile)
+  root = tree.getroot()
+
   D = root.findall(".//div[@class='thread']/div[@class='message']")
   P = root.findall(".//div[@class='thread']/p")
 
-  fileHandle = open("output.txt", "w")
+  fileHandle = open(outfile, "w")
 
   for i in range(0,len(D)):
 
