@@ -1,7 +1,6 @@
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import re
-import re
 import webbrowser
 import xml_parser as xp
 import detect
@@ -9,7 +8,7 @@ import builtins
 import ActivityIndicator as ai
 import threading
 
-WINDOW_HEIGHT = 500
+WINDOW_HEIGHT = 450
 WINDOW_WIDTH = 500
 
 root = Tk()
@@ -34,10 +33,10 @@ def getFile():
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
 	print("Training neural network...")
 	worker = threading.Thread(target=trainNetwork, args=(name,))
-	# Run thread in the background to allow UI updates
+	
+	#run thread in the background to allow UI updates
 	worker.start()
 	
-
 def trainNetwork(name):
 	detect.train(name)
 	print("Training completed.")
@@ -50,13 +49,11 @@ def exitProgram():
 def displayHelp():
 	webbrowser.open("https://github.com/exzackly/conText", new=2)
 
-def displayResults(percent):
-	toplevel = Toplevel()
-	print("Computing cross entropy.")	
+def displayResults():
+	print("Computing cross entropy.")
 	perplexity = detect.test(inputTextarea.get("1.0",END))
-	label = Label(toplevel, text="Perplexity: {:.0f}".format(perplexity), height=0, width=40)
-	label.pack()
-	toplevel.focus()
+	if perplexity != None:
+		print("Perplexity: {:.0f}".format(perplexity))
 	
 #create menu
 menu = Menu(root)
@@ -88,13 +85,8 @@ outputTextarea.pack()
 outputTextarea.place(bordermode=OUTSIDE, x = 30, y = 230)
 
 #create compare button
-compareButton = Button(root, text="Compare Text", command=lambda: displayResults(21))
+compareButton = Button(root, text="Compare Text", command=lambda: displayResults())
 compareButton.pack()
 compareButton.place(bordermode=OUTSIDE, x = 200, y = 410)
-
-#create result label
-resultLabel = Label(root, text="", font=("Helvetica", 21))
-resultLabel.pack()
-resultLabel.place(bordermode=OUTSIDE, x = 30, y = 450)
 
 root.mainloop()
