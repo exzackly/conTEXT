@@ -3,6 +3,7 @@ from tkinter.filedialog import askopenfilename
 import re
 import webbrowser
 import xml_parser as xp
+import builtins
 
 WINDOW_HEIGHT = 500
 WINDOW_WIDTH = 500
@@ -11,6 +12,11 @@ root = Tk()
 root.wm_title("conText by EXZACKLY and ZENO")
 root.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+def print(*args, **kwargs):
+	textarea.insert(INSERT, *args)
+	textarea.insert(INSERT, "\n")
+	return builtins.print(*args, **kwargs)
+	
 def getFile():
 	filename = askopenfilename()
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
