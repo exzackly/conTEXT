@@ -18,6 +18,8 @@
 Trains the model described in:
 (Zaremba, et. al.) Recurrent Neural Network Regularization
 http://arxiv.org/abs/1409.2329
+
+Modified by Brendon Boldt for the hackMarist hackathon.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -35,22 +37,6 @@ import shutil
 flags = tf.flags
 logging = tf.logging
 FLAGS = None
-
-'''
-flags.DEFINE_string(
-    "model", "small",
-    "A type of model. Possible options are: small, medium, large.")
-flags.DEFINE_string("data_path", "data/",
-                    "Where the training/test data is stored.")
-flags.DEFINE_string("save_path", "tf_log/",
-                    "Model output directory.")
-flags.DEFINE_bool("use_fp16", False,
-                  "Train using 16-bit floats instead of 32bit floats")
-flags.DEFINE_bool("test", False,
-                  "Test model specfied by save_path.")
-
-FLAGS = flags.FLAGS
-'''
 
 def data_type():
   return tf.float16 if FLAGS.use_fp16 else tf.float32
@@ -192,7 +178,6 @@ class PTBModel(object):
   def train_op(self):
     return self._train_op
 
-
 class SmallConfig(object):
   """Small config."""
   init_scale = 0.1
@@ -224,7 +209,6 @@ class MediumConfig(object):
   batch_size = 20
   vocab_size = 10000
 
-
 class LargeConfig(object):
   """Large config."""
   init_scale = 0.04
@@ -240,7 +224,6 @@ class LargeConfig(object):
   batch_size = 20
   vocab_size = 10000
 
-
 class TestConfig(object):
   """Tiny config, for testing."""
   init_scale = 0.1
@@ -255,22 +238,6 @@ class TestConfig(object):
   lr_decay = 0.5
   batch_size = 20
   vocab_size = 20000
-
-class CustomConfig(object):
-  """Tiny config, for testing."""
-  init_scale = 0.1
-  learning_rate = 1.0
-  max_grad_norm = 1
-  num_layers = 1
-  num_steps = 2
-  hidden_size = 2
-  max_epoch = 1
-  max_max_epoch = 1
-  keep_prob = 1.0
-  lr_decay = 0.5
-  batch_size = 20
-  vocab_size = 20
-
 
 def run_epoch(session, model, eval_op=None, verbose=False):
   """Runs the model on the given data."""
@@ -314,18 +281,9 @@ def run_epoch(session, model, eval_op=None, verbose=False):
       print("%.3f perplexity: %.3f speed: %.0f wps" %
             (step * 1.0 / model.input.epoch_size, np.exp(costs / iters),
              iters * model.input.batch_size / (time.time() - start_time)))
-      '''
-      if (num_predictions != 0):
-        print("top1 : %.3f" % (top1/num_predictions))
-        print("top5 : %.3f" % (top5/num_predictions))
-        print("top10: %.3f" % (top10/num_predictions))
-      '''
       top1, top5, top10, num_predictions = 0, 0, 0, 0
 
-  if FLAGS.test:
-    return costs / iters
-  else:
-    return np.exp(costs / iters)
+  return np.exp(costs / iters)
 
 
 def get_config():
@@ -348,13 +306,8 @@ def init(argFlags):
   FLAGS.save_path = FLAGS.save_path.strip('/') + '-' + FLAGS.model + '/'
 
 def main():
-  if not FLAGS.data_path:
-    raise ValueError("Must set --data_path to PTB data directory")
-
   raw_data = reader.ptb_raw_data(FLAGS.data_path)
-  #train_data, valid_data, _, _ = raw_data
   train_data, valid_data, test_data, _ = raw_data
-  #test_data = reader.get_test_data(FLAGS.data_path, FLAGS.test)
 
   config = get_config()
   eval_config = get_config()
@@ -389,59 +342,47 @@ def main():
     sv = tf.train.Supervisor(logdir=FLAGS.save_path)
 
     with sv.managed_session() as session:
-      if FLAGS.test:
-        pass
-        print("Restoring model from " + FLAGS.save_path)
-        m.saver.restore(session, FLAGS.save_path + '-0')
-      
-        test_perplexity = run_epoch(session, mtest)
-        print("Test Perplexity: %.3f" % test_perplexity)
-        #return session 
-      else:
-        for i in range(config.max_max_epoch):
-          lr_decay = config.lr_decay ** max(i - config.max_epoch, 0.0)
-          m.assign_lr(session, config.learning_rate * lr_decay)
+      # Train the neural network here
+      for i in range(config.max_max_epoch):
+        lr_decay = config.lr_decay ** max(i - config.max_epoch, 0.0)
+        m.assign_lr(session, config.learning_rate * lr_decay)
 
-          print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(m.lr)))
-          train_perplexity = run_epoch(session, m, eval_op=m.train_op,
-                                       verbose=True)
-          print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
-          valid_perplexity = run_epoch(session, mvalid)
-          print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
+        print("Epoch: %d Learning rate: %.3f" % (i + 1, session.run(m.lr)))
+        train_perplexity = run_epoch(session, m, eval_op=m.train_op,
+                                     verbose=True)
+        print("Epoch: %d Train Perplexity: %.3f" % (i + 1, train_perplexity))
+        valid_perplexity = run_epoch(session, mvalid)
+        print("Epoch: %d Valid Perplexity: %.3f" % (i + 1, valid_perplexity))
 
+      # Save the neural network to a directory
       if not FLAGS.test and FLAGS.save_path:
         print("Saving model to %s." % FLAGS.save_path)
         sv.saver.save(session, FLAGS.save_path, global_step=0)
-        #sv.saver.save(session, FLAGS.save_path, global_step=sv.global_step)
 
 
 if __name__ == "__main__":
   tf.app.run()
 
-def get_test_session():
-  sv = tf.train.Supervisor(logdir=FLAGS.save_path)
-  with sv.managed_session() as session:
-    print("Restoring model from " + FLAGS.save_path)
-    sv.saver.restore(session, FLAGS.save_path + '-0')
-  
-    return session 
-
+''' Retrieve the perplexity for a given string of words '''
 def test_words(words):
   config = get_config()
   eval_config = get_config()
   config.batch_size = 1
   eval_config.batch_size = 1
 
+  # Format words correctly for the neural network
   words = xp.sanitizeString(words)
+
+  # Translate the input words into the corresponding embedding IDs
   test_data = reader.get_test_data(FLAGS.data_path + "train.txt"
-      , words)#, min_length = config.num_steps)
-  #_, test_data, _, _ = reader.ptb_raw_data(FLAGS.data_path)
+      , words)
   print(test_data)
 
   with tf.Graph().as_default():
     initializer = tf.random_uniform_initializer(-config.init_scale,
                                                 config.init_scale)
     with tf.name_scope("Test"):
+      # Build the test neural network model
       test_input = PTBInput(config=config, data=test_data, name="TestInput")
       with tf.variable_scope("Model", reuse=False, initializer=initializer):
         mtest = PTBModel(is_training=False, config=eval_config, input_=test_input)
@@ -450,6 +391,7 @@ def test_words(words):
 
     with sv.managed_session() as session:
       print("Restoring model from " + FLAGS.save_path)
+      # Restore the variables from the trained neural network
       mtest.saver.restore(session, FLAGS.save_path + '-0')
       test_perplexity = run_epoch(session, mtest)
       #print("Test Perplexity: %.3f" % test_perplexity)

@@ -41,11 +41,10 @@ def _build_vocab(filename):
 
   return word_to_id
 
-
 def _text_to_word_ids(string, word_to_id):
+  ''' Replace the words of a given string with their embedding IDs '''
   data = string.replace("\n", "<eos>").split()
   return [word_to_id[word] if word in word_to_id else word_to_id['<unk>'] for word in data]
-  #return [word_to_id[word] for word in data if word in word_to_id]
 
 def _file_to_word_ids(filename, word_to_id):
   data = _read_words(filename)
@@ -83,6 +82,7 @@ def ptb_raw_data(data_path=None):
   return train_data, valid_data, test_data, vocabulary
 
 def get_test_data(train_path, text):
+  ''' Retrieve test data using the embeddings from the training data '''
   word_to_id = _build_vocab(train_path)
   test_data = _text_to_word_ids(text, word_to_id)
   return test_data
