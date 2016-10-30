@@ -38,7 +38,7 @@ def displayHelp():
 def displayResults(percent):
 	toplevel = Toplevel()
 	print("Computing cross entropy.")	
-	cross_entropy = detect.test(textarea.get("1.0",END))
+	cross_entropy = detect.test(inputTextarea.get("1.0",END))
 	label = Label(toplevel, text="cross entropy {0}".format(cross_entropy), height=0, width=50)
 	label.pack()
 	toplevel.focus()
