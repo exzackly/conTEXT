@@ -1,8 +1,10 @@
 from tkinter import *
 from tkinter.filedialog import askopenfilename
 import re
+import re
 import webbrowser
 import xml_parser as xp
+import detect
 import builtins
 
 WINDOW_HEIGHT = 500
@@ -20,7 +22,9 @@ def print(*args, **kwargs):
 def getFile():
 	filename = askopenfilename()
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
-	xp.extract_messages(filename, "{0}.txt".format(name), name)
+	print("Training neural network...")	
+	detect.train(name)
+	print("Training completed.")	
 
 def exitProgram():
 	root.destroy()
@@ -30,7 +34,9 @@ def displayHelp():
 
 def displayResults(percent):
 	toplevel = Toplevel()
-	label = Label(toplevel, text="test {0} percent".format(percent), height=0, width=50)
+	print("Computing cross entropy.")	
+	cross_entropy = detect.test(textarea.get("1.0",END))
+	label = Label(toplevel, text="cross entropy {0}".format(cross_entropy), height=0, width=50)
 	label.pack()
 	toplevel.focus()
 	
@@ -64,7 +70,7 @@ compareButton.pack()
 compareButton.place(bordermode=OUTSIDE, x = 200, y = 390)
 
 #create result label
-resultLabel = Label(root, text="Text is 21% similar", font=("Helvetica", 21))
+resultLabel = Label(root, text="", font=("Helvetica", 21))
 resultLabel.pack()
 resultLabel.place(bordermode=OUTSIDE, x = 30, y = 420)
 
