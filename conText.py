@@ -7,6 +7,7 @@ import xml_parser as xp
 import detect
 import builtins
 import ActivityIndicator as ai
+import threading
 
 WINDOW_HEIGHT = 500
 WINDOW_WIDTH = 500
@@ -23,11 +24,20 @@ def print(*args, **kwargs):
 	return builtins.print(*args, **kwargs)
 	
 def getFile():
+	#show activity indicator
+	root.a = ai.Activity(root, 500, bg = "gray", height=2, width=5)
+	root.a.pack()
+	root.a.place(bordermode=OUTSIDE, x = 220, y = 200)
+	root.a.start()
+	
 	filename = askopenfilename()
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
-	print("Training neural network...")	
-	detect.train(name)
-	print("Training completed.")	
+	print("Training neural network...")
+	threading.Thread(target=detect.train, args=(name,)).start()
+	print("Training completed.")
+	
+	#stop activity indicator
+	root.after(5000, root.a.stop)
 
 def exitProgram():
 	root.destroy()
