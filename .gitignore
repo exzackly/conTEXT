@@ -1,2 +1,3 @@
-messages.htm
-output.txt
+*.htm
+*.txt
+__pycache__/
