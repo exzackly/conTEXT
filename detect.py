@@ -11,45 +11,37 @@ import rnn
 import prepare
 import xml_parser as xp
 
-flags = tf.flags
-
-flags.DEFINE_bool("test", False, "")
-flags.DEFINE_string(
-    "model", "test",
-    "A type of model. Possible options are: small, medium, large.")
-flags.DEFINE_string("data_path", "data/",
-                    "Where the training/test data is stored.")
-flags.DEFINE_string("save_path", "save/",
-                    "Model output directory.")
-flags.DEFINE_bool("use_fp16", False,
-                  "Train using 16-bit floats instead of 32bit floats")
-
-FLAGS = flags.FLAGS
-
-rnn.init(flags.FLAGS)
-
 class Args:
   pass
 
+class Flags:
+  pass
+
+FLAGS = Flags()
+
+# Set parameters for the neural network
+FLAGS.model = 'test'
+FLAGS.data_path = 'data/'
+FLAGS.save_path = 'save/'
+FLAGS.use_fp16 = False
+FLAGS.test = True
+
+rnn.init(FLAGS)
+
+# Get per word perplexity for the sample text
 def test(text):
+  rnn.FLAGS.test = True
   return rnn.test_words(text)
 
-'''
-if FLAGS.test:
-  #print(rnn.test_words(" 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 "))
-  #print(rnn.test_words("That was <unk> lovely; I look forward to it being <unk> at Bardavon this spring. I am happy to report that I have extended my flute range to F# ( yes , the fourth one )"))
-  #print(rnn.test_words("That was <unk> lovely; I lok frward to it bing <unk> at Brdavon this sping. I am appy to reort tha I have xtended my flute range to F# ( yes , the fourth one )"))
-  print(rnn.test_words(" Hello; my name is Brendon. If you do not believe this is me -- well there is nothing I can do about that. I wish you the best."))
-  print(rnn.test_words("hiya why would u think it's me?? do i really type like this at all; i dont know why this isn't workin at all. it makes me sooo sad "))
-'''
-
 def train(name):
+  rnn.FLAGS.test = False
+  # Extract messages from Facebook Messenger data
   xp.extract_messages(name + '.htm', name + '.txt', name)
   args = Args()
   args.infile = name + '.txt'
-  #args.outfile = FLAGS.data_path + 'tokens.txt'
   args.out_dir = FLAGS.data_path
   args.vocab_size = 20000
   args.frequency = False
+  # Prepare the extracted messages for neural net training
   prepare.process_file(args)
   rnn.main()

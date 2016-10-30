@@ -33,11 +33,16 @@ def getFile():
 	filename = askopenfilename()
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
 	print("Training neural network...")
-	threading.Thread(target=detect.train, args=(name,)).start()
-	print("Training completed.")
+	worker = threading.Thread(target=trainNetwork, args=(name,))
+	# Run thread in the background to allow UI updates
+	worker.start()
 	
+
+def trainNetwork(name):
+	detect.train(name)
+	print("Training completed.")
 	#stop activity indicator
-	root.after(5000, root.a.stop)
+	root.a.stop()
 
 def exitProgram():
 	root.destroy()
@@ -48,8 +53,8 @@ def displayHelp():
 def displayResults(percent):
 	toplevel = Toplevel()
 	print("Computing cross entropy.")	
-	cross_entropy = detect.test(inputTextarea.get("1.0",END))
-	label = Label(toplevel, text="cross entropy {0}".format(cross_entropy), height=0, width=50)
+	perplexity = detect.test(inputTextarea.get("1.0",END))
+	label = Label(toplevel, text="Perplexity: {:.0f}".format(perplexity), height=0, width=40)
 	label.pack()
 	toplevel.focus()
 	
