@@ -29,6 +29,8 @@ import numpy as np
 import tensorflow as tf
 
 import reader
+import xml_parser as xp
+import shutil
 
 flags = tf.flags
 logging = tf.logging
@@ -203,7 +205,7 @@ class SmallConfig(object):
   max_max_epoch = 13
   keep_prob = 1.0
   lr_decay = 0.5
-  batch_size = 1#20
+  batch_size = 20
   vocab_size = 10000
 
 
@@ -251,8 +253,8 @@ class TestConfig(object):
   max_max_epoch = 1
   keep_prob = 1.0
   lr_decay = 0.5
-  batch_size = 1
-  vocab_size = 10000
+  batch_size = 20
+  vocab_size = 20000
 
 class CustomConfig(object):
   """Tiny config, for testing."""
@@ -350,8 +352,8 @@ def main():
     raise ValueError("Must set --data_path to PTB data directory")
 
   raw_data = reader.ptb_raw_data(FLAGS.data_path)
-  train_data, valid_data, _, _ = raw_data
-  #train_data, valid_data, test_data, _ = raw_data
+  #train_data, valid_data, _, _ = raw_data
+  train_data, valid_data, test_data, _ = raw_data
   #test_data = reader.get_test_data(FLAGS.data_path, FLAGS.test)
 
   config = get_config()
@@ -376,24 +378,24 @@ def main():
         mvalid = PTBModel(is_training=False, config=config, input_=valid_input)
       tf.scalar_summary("Validation Loss", mvalid.cost)
 
-    '''
     with tf.name_scope("Test"):
       test_input = PTBInput(config=config, data=test_data, name="TestInput")
       with tf.variable_scope("Model", reuse=True, initializer=initializer):
         mtest = PTBModel(is_training=False, config=eval_config,
                          input_=test_input)
-    '''
 
+    if not FLAGS.test:
+      shutil.rmtree(FLAGS.save_path)
     sv = tf.train.Supervisor(logdir=FLAGS.save_path)
 
     with sv.managed_session() as session:
       if FLAGS.test:
         pass
-        #print("Restoring model from " + FLAGS.save_path)
-        #m.saver.restore(session, FLAGS.save_path + '-0')
+        print("Restoring model from " + FLAGS.save_path)
+        m.saver.restore(session, FLAGS.save_path + '-0')
       
-        #test_perplexity = run_epoch(session, mtest)
-        #print("Test Perplexity: %.3f" % test_perplexity)
+        test_perplexity = run_epoch(session, mtest)
+        print("Test Perplexity: %.3f" % test_perplexity)
         #return session 
       else:
         for i in range(config.max_max_epoch):
@@ -425,9 +427,17 @@ def get_test_session():
     return session 
 
 def test_words(words):
-  test_data = reader.get_test_data(FLAGS.data_path + "train.txt", words)
   config = get_config()
   eval_config = get_config()
+  config.batch_size = 1
+  eval_config.batch_size = 1
+
+  words = xp.sanitizeString(words)
+  test_data = reader.get_test_data(FLAGS.data_path + "train.txt"
+      , words)#, min_length = config.num_steps)
+  #_, test_data, _, _ = reader.ptb_raw_data(FLAGS.data_path)
+  print(test_data)
+
   with tf.Graph().as_default():
     initializer = tf.random_uniform_initializer(-config.init_scale,
                                                 config.init_scale)

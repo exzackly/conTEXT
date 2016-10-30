@@ -42,8 +42,10 @@ def _build_vocab(filename):
   return word_to_id
 
 
-def _text_to_word_ids(data, word_to_id):
-  return [word_to_id[word] for word in data if word in word_to_id]
+def _text_to_word_ids(string, word_to_id):
+  data = string.replace("\n", "<eos>").split()
+  return [word_to_id[word] if word in word_to_id else word_to_id['<unk>'] for word in data]
+  #return [word_to_id[word] for word in data if word in word_to_id]
 
 def _file_to_word_ids(filename, word_to_id):
   data = _read_words(filename)

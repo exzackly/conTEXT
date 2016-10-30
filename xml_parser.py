@@ -14,7 +14,7 @@ def sanitizeString(input):
 	input = list(re.sub( ' +', ' ', input).strip())
 	input.insert(0, " ")
 	input += [" "]
-	return ''.join(input)
+	return ''.join(input).lower()
 
 def extract_messages(infile, outfile, myName):
   tree = ET.parse(infile)
