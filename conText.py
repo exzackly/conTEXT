@@ -4,6 +4,7 @@ import re
 import webbrowser
 import xml_parser as xp
 import builtins
+import ActivityIndicator as ai
 
 WINDOW_HEIGHT = 500
 WINDOW_WIDTH = 500
@@ -13,8 +14,10 @@ root.wm_title("conText by EXZACKLY and ZENO")
 root.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
 def print(*args, **kwargs):
-	textarea.insert(INSERT, *args)
-	textarea.insert(INSERT, "\n")
+	outputTextarea.configure(state="normal")
+	outputTextarea.insert(INSERT, *args)
+	outputTextarea.insert(INSERT, "\n")
+	outputTextarea.configure(state="disabled")
 	return builtins.print(*args, **kwargs)
 	
 def getFile():
@@ -54,18 +57,23 @@ headerLabel.pack()
 headerLabel.place(bordermode=OUTSIDE, x = 30, y = 15)
 
 #create textarea
-textarea = Text(root, height = 20, width = 54)
-textarea.pack()
-textarea.place(bordermode=OUTSIDE, x = 30, y = 50)
+inputTextarea = Text(root, height = 10, width = 54)
+inputTextarea.pack()
+inputTextarea.place(bordermode=OUTSIDE, x = 30, y = 50)
+
+#create output textarea
+outputTextarea = Text(root, state=DISABLED, height = 10, width = 54, bg="lightGray")
+outputTextarea.pack()
+outputTextarea.place(bordermode=OUTSIDE, x = 30, y = 230)
 
 #create compare button
 compareButton = Button(root, text="Compare Text", command=lambda: displayResults(21))
 compareButton.pack()
-compareButton.place(bordermode=OUTSIDE, x = 200, y = 390)
+compareButton.place(bordermode=OUTSIDE, x = 200, y = 410)
 
 #create result label
 resultLabel = Label(root, text="Text is 21% similar", font=("Helvetica", 21))
 resultLabel.pack()
-resultLabel.place(bordermode=OUTSIDE, x = 30, y = 420)
+resultLabel.place(bordermode=OUTSIDE, x = 30, y = 450)
 
 root.mainloop()
