@@ -15,6 +15,7 @@ root = Tk()
 root.wm_title("conText by EXZACKLY and ZENO")
 root.minsize(WINDOW_WIDTH, WINDOW_HEIGHT)
 
+#override print to append to output textarea
 def print(*args, **kwargs):
 	outputTextarea.configure(state="normal")
 	outputTextarea.insert(INSERT, *args)
@@ -29,6 +30,7 @@ def getFile():
 	root.a.place(bordermode=OUTSIDE, x = 220, y = 200)
 	root.a.start()
 	
+	#grab filename, and start training
 	filename = askopenfilename()
 	name = re.search("/.*/(.*?)\.htm", filename).group(1)
 	print("Training neural network...")

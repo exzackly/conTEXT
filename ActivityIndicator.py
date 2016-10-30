@@ -1,3 +1,5 @@
+#Retrived from http://stackoverflow.com/a/35753431
+
 import tkinter as tk
 
 class Activity(tk.Label):
